@@ -1,10 +1,10 @@
 package edu.gmu.cs.multiagent.matrix;
 
 import java.io.IOException;
-
+import java.util.ArrayList;
 import com.google.gson.stream.JsonReader;
+import edu.gmu.cs.multiagent.dist.DiscreteInteger;
 
-import edu.gmu.cs.multiagent.dist.Discrete;
 
 /**
  * 
@@ -14,21 +14,23 @@ import edu.gmu.cs.multiagent.dist.Discrete;
 
 public class Transition {
 
-	Discrete distribution;
+	DiscreteInteger distribution;
 	
 	public Transition(JsonReader reader) {
-		distribution = new Discrete();
+		ArrayList<Integer> states = new ArrayList<Integer>();
+		ArrayList<Double> probs = new ArrayList<Double>();
 		try {
 			reader.beginObject();
 			while(reader.hasNext()) {
-				double state = Double.parseDouble(reader.nextName());
+				int state = Integer.parseInt(reader.nextName());
 				double stateProb = reader.nextDouble();
-				distribution.addItem(state, stateProb);
+				states.add(state);
+				probs.add(stateProb);
 			}
-			
 			reader.endObject();
+			distribution = new DiscreteInteger(states, probs);
 		} catch (IOException e) {
-			System.err.println("Error at parsing reward object");
+			System.err.println("Error at parsing transition object");
 		}
 		
 	}

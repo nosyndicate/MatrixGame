@@ -3,10 +3,7 @@ package edu.gmu.cs.multiagent.matrix;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
-
-import com.google.gson.Gson;
 import com.google.gson.stream.*;
 
 /**
@@ -30,6 +27,7 @@ public class Game {
 
 	public Game(String gameFile) {
 		stateList = new ArrayList<State>();
+		startState = 0; // default start state
 		parseGame(gameFile);
 		gameEnded = false;
 	}
@@ -50,6 +48,9 @@ public class Game {
 				}
 				else if (name.equals("AgentTwoAction")) {
 					agentTwoActionNum = jsonReader.nextInt();
+				}
+				else if (name.equals("StartState")) {
+					startState = jsonReader.nextInt();
 				}
 				else if (name.equals("Matrices")) {
 					jsonReader.beginArray();
@@ -84,6 +85,10 @@ public class Game {
 
 		if (getCurrentState().isTerminalState())
 			gameEnded = true;
+	}
+	
+	public void resetGame() {
+		currentState = startState;
 	}
 
 	private State getCurrentState() {

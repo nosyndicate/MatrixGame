@@ -3,9 +3,13 @@ package edu.gmu.cs.multiagent.matrix;
 import java.io.IOException;
 import java.util.ArrayList;
 
+
+
+
 import com.google.gson.stream.JsonReader;
 
-import edu.gmu.cs.multiagent.dist.Discrete;
+import edu.gmu.cs.multiagent.dist.DiscreteInteger;
+import edu.gmu.cs.multiagent.dist.DiscreteReal;
 import edu.gmu.cs.multiagent.dist.Distribution;
 
 /**
@@ -25,7 +29,6 @@ public class Reward {
 			reader.nextName();
 			String rewardType = reader.nextString();
 			if(rewardType.equals("Discrete")) {
-				distribution = new Discrete();
 				parseDiscreteReward(reader);
 			}
 			reader.endObject();
@@ -37,13 +40,16 @@ public class Reward {
 	}
 
 	private void parseDiscreteReward(JsonReader reader) throws IOException {
-
+		ArrayList<Double> rewards = new ArrayList<Double>();
+		ArrayList<Double> probs = new ArrayList<Double>();
 		while(reader.hasNext()) {
 			double rewardValue = Double.parseDouble(reader.nextName());
 			double rewardProb = reader.nextDouble();
-			((Discrete)distribution).addItem(rewardValue, rewardProb);
+			rewards.add(rewardValue);
+			probs.add(rewardProb);
 		}
 		
+		distribution = new DiscreteReal(rewards, probs);
 	}
 
 	public double getReward() {
