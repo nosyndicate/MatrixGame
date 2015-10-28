@@ -15,7 +15,8 @@ import com.google.gson.stream.JsonReader;
 public class State {
 
 	private Transition[][] transitionMatrix;
-	private Reward[][] rewardMatrix;
+	private Reward[][] rewardMatrixOne;
+	private Reward[][] rewardMatrixTwo;
 	private int nextState;
 	private double[] rewards;
 	private boolean terminalState = false;
@@ -23,18 +24,23 @@ public class State {
 	private int agentTwoActionNum = 0;
 	
 	public State(JsonReader jsonReader, int agentOneActionNum, int agentTwoActionNum) {
+		rewards = new double[2];
 		this.agentOneActionNum = agentOneActionNum;
 		this.agentTwoActionNum = agentTwoActionNum;
 		
 		transitionMatrix = new Transition[agentOneActionNum][agentTwoActionNum];
-		rewardMatrix = new Reward[agentOneActionNum][agentTwoActionNum];
-	
 		try {
-			
+			int counter = 0;
 			jsonReader.beginObject();
 			String matrixName = jsonReader.nextName();
-			if (matrixName.equals("Rewards")) {
-				parseRewards(jsonReader);
+			if (matrixName.equals("Rewards")&&counter==0) {
+				rewardMatrixOne = new Reward[agentOneActionNum][agentTwoActionNum];
+				parseRewards(jsonReader, rewardMatrixOne);
+				counter++;
+			} else if(matrixName.equals("Rewards")&&counter==1) {
+				rewardMatrixTwo = new Reward[agentOneActionNum][agentTwoActionNum];
+				parseRewards(jsonReader, rewardMatrixTwo);
+				counter++;
 			} else if (matrixName.equals("Transitions")) {
 				parseTransitions(jsonReader, agentOneActionNum, agentTwoActionNum);
 			} else if (matrixName.equals("Type")) {
@@ -45,13 +51,18 @@ public class State {
 				}
 			}
 			jsonReader.endObject();
+			
+			// we have a coopertive game
+			if(rewardMatrixTwo==null) { 
+				rewardMatrixTwo = rewardMatrixOne;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	
-	private void parseRewards(JsonReader jsonReader) {
+	private void parseRewards(JsonReader jsonReader, Reward[][] rewardMatrix) {
 		try {
 			int rowCounter = 0;
 			int columnCounter = 0;
@@ -61,8 +72,7 @@ public class State {
 			while(jsonReader.hasNext()) {
 				jsonReader.beginArray();
 				while(jsonReader.hasNext()) {
-					String rewardValue = jsonReader.nextString();
-					rewardMatrix[rowCounter][columnCounter] = new Reward(rewardValue);
+					rewardMatrix[rowCounter][columnCounter] = new Reward(jsonReader);
 					columnCounter++;
 				}
 				rowCounter++;
@@ -88,10 +98,12 @@ public class State {
 	}
 	
 	public void play(int agentOneAction, int agentTwoAction) {
-		Reward reward = rewardMatrix[agentOneAction][agentTwoAction];
+		Reward rewardOne = rewardMatrixOne[agentOneAction][agentTwoAction];
+		Reward rewardTwo = rewardMatrixTwo[agentOneAction][agentTwoAction];
 		Transition transition = transitionMatrix[agentOneAction][agentTwoAction];
 		
-		rewards = reward.getReward();
+		rewards[0] = rewardOne.getReward();
+		rewards[1] = rewardTwo.getReward();
 		nextState = transition.getNextState();
 	}
 
