@@ -29,6 +29,7 @@ public class Game {
 	private double[] rewards;
 
 	public Game(String gameFile) {
+		stateList = new ArrayList<State>();
 		parseGame(gameFile);
 		gameEnded = false;
 	}

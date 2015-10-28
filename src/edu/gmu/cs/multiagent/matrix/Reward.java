@@ -22,6 +22,7 @@ public class Reward {
 		
 		try {
 			reader.beginObject();
+			reader.nextName();
 			String rewardType = reader.nextString();
 			if(rewardType.equals("Discrete")) {
 				distribution = new Discrete();

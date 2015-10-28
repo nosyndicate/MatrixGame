@@ -32,6 +32,7 @@ public class State {
 		try {
 			int counter = 0;
 			jsonReader.beginObject();
+			while(jsonReader.hasNext()) {
 			String matrixName = jsonReader.nextName();
 			if (matrixName.equals("Rewards")&&counter==0) {
 				rewardMatrixOne = new Reward[agentOneActionNum][agentTwoActionNum];
@@ -42,13 +43,14 @@ public class State {
 				parseRewards(jsonReader, rewardMatrixTwo);
 				counter++;
 			} else if (matrixName.equals("Transitions")) {
-				parseTransitions(jsonReader, agentOneActionNum, agentTwoActionNum);
+				parseTransitions(jsonReader);
 			} else if (matrixName.equals("Type")) {
 				String value = jsonReader.nextString();
 				if(value.equals("NULL"))
 				{
 					terminalState = true;
 				}
+			}
 			}
 			jsonReader.endObject();
 			
@@ -85,11 +87,20 @@ public class State {
 		}
 	}
 
-	private void parseTransitions(JsonReader jsonReader, int agentOneActionNum, int agentTwoActionNum) {
+	private void parseTransitions(JsonReader jsonReader) {
 		try {
+			int rowCounter = 0;
+			int columnCounter = 0;
 			jsonReader.beginArray();
 			while(jsonReader.hasNext()) {
-				
+				jsonReader.beginArray();
+				while(jsonReader.hasNext()) {
+					transitionMatrix[rowCounter][columnCounter] = new Transition(jsonReader);
+					columnCounter++;
+				}
+				rowCounter++;
+				columnCounter = 0;
+				jsonReader.endArray();
 			}
 			jsonReader.endArray();
 		} catch (IOException e) {

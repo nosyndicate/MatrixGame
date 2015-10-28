@@ -3,7 +3,7 @@ package edu.gmu.cs.multiagent.dist;
 
 public class Discrete implements Distribution {
 
-	public void addItem(double rewardValue, double rewardProb) {
+	public void addItem(double value, double prob) {
 		// TODO Auto-generated method stub
 		
 	}
