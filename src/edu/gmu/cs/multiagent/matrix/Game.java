@@ -13,23 +13,23 @@ import com.google.gson.stream.*;
  */
 
 public class Game {
-
-	public int numActions;
+	public String gameName;
+	public int[] numActions;
 	public int numStates;
 	public int currentState;
 	private int startState;
 	private boolean gameEnded;
-	private String gameName;
-	private int agentOneActionNum;
-	private int agentTwoActionNum;
 	private ArrayList<State> stateList;
 	private double[] rewards;
+	private int agentOneLastAction;
+	private int agentTwoLastAction;
 
 	public Game(String gameFile) {
 		stateList = new ArrayList<State>();
 		startState = 0; // default start state
 		parseGame(gameFile);
 		gameEnded = false;
+		numActions = new int[2];
 	}
 
 	private void parseGame(String gameFile) {
@@ -44,10 +44,10 @@ public class Game {
 					System.out.println(gameName);
 				}
 				else if (name.equals("AgentOneAction")) {
-					agentOneActionNum = jsonReader.nextInt();
+					numActions[0] = jsonReader.nextInt();
 				}
 				else if (name.equals("AgentTwoAction")) {
-					agentTwoActionNum = jsonReader.nextInt();
+					numActions[1] = jsonReader.nextInt();
 				}
 				else if (name.equals("StartState")) {
 					startState = jsonReader.nextInt();
@@ -57,7 +57,7 @@ public class Game {
 
 					// read the data of each state
 					while (jsonReader.hasNext()) {
-						State state = new State(jsonReader, agentOneActionNum, agentTwoActionNum);
+						State state = new State(jsonReader, numActions[0], numActions[1]);
 						stateList.add(state);
 					}
 					jsonReader.endArray();
@@ -78,6 +78,7 @@ public class Game {
 
 
 	public void play(int agentOneAction, int agentTwoAction) {
+		
 		State state = getCurrentState();
 		state.play(agentOneAction, agentTwoAction);
 		rewards = state.getReward();
@@ -85,6 +86,9 @@ public class Game {
 
 		if (getCurrentState().isTerminalState())
 			gameEnded = true;
+		
+		agentOneLastAction = agentOneAction;
+		agentTwoLastAction = agentTwoAction;
 	}
 	
 	public void resetGame() {
@@ -104,5 +108,13 @@ public class Game {
 
 	public boolean isGameEnd() {
 		return gameEnded;
+	}
+	
+	public int getAgentOneLastAction() {
+		return agentOneLastAction;
+	}
+
+	public int getAgentTwoLastAction() {
+		return agentTwoLastAction;
 	}
 }
