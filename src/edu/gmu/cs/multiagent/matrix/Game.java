@@ -14,12 +14,11 @@ import com.google.gson.stream.*;
 
 public class Game {
 	public String gameName;
-	public int[] numActions;
 	public int numStates;
 	public int currentState;
 	private int startState;
 	private boolean gameEnded;
-	private ArrayList<State> stateList;
+	public ArrayList<State> stateList;
 	private double[] rewards;
 	private int agentOneLastAction;
 	private int agentTwoLastAction;
@@ -28,8 +27,9 @@ public class Game {
 		stateList = new ArrayList<State>();
 		startState = 0; // default start state
 		parseGame(gameFile);
+		numStates = stateList.size();
 		gameEnded = false;
-		numActions = new int[2];
+	
 	}
 
 	private void parseGame(String gameFile) {
@@ -41,13 +41,6 @@ public class Game {
 				String name = jsonReader.nextName();
 				if (name.equals("Name")) {
 					gameName = jsonReader.nextString();
-					System.out.println(gameName);
-				}
-				else if (name.equals("AgentOneAction")) {
-					numActions[0] = jsonReader.nextInt();
-				}
-				else if (name.equals("AgentTwoAction")) {
-					numActions[1] = jsonReader.nextInt();
 				}
 				else if (name.equals("StartState")) {
 					startState = jsonReader.nextInt();
@@ -57,12 +50,12 @@ public class Game {
 
 					// read the data of each state
 					while (jsonReader.hasNext()) {
-						State state = new State(jsonReader, numActions[0], numActions[1]);
+						State state = new State(jsonReader);
 						stateList.add(state);
+						
 					}
 					jsonReader.endArray();
 				}
-
 			}
 
 			jsonReader.endObject();
@@ -116,5 +109,23 @@ public class Game {
 
 	public int getAgentTwoLastAction() {
 		return agentTwoLastAction;
+	}
+
+	public int checkPolicy(int[] policy1, int[] policy2) {
+		boolean complete = true;
+		
+		for(int i = 0;i<stateList.size();++i)
+		{
+			State state = stateList.get(i);
+			if(!state.checkPolicy(policy1[i],policy2[i])) {
+				complete = false;
+				if(state.correctPolicyState()) {
+					return 2; // fail
+				}
+					
+			}
+		}
+		
+		return complete?0:1;
 	}
 }
